@@ -1,13 +1,6 @@
 # Hangfire.RecurringJobAdmin
-[![NuGet](https://buildstats.info/nuget/Hangfire.RecurringJobAdmin)](https://www.nuget.org/packages/Hangfire.RecurringJobAdmin/)
-[![Build Status](https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin/workflows/CI-HRJ/badge.svg)](https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin/actions)
-[![Official Site](https://img.shields.io/badge/site-hangfire.io-blue.svg)](http://hangfire.io)
-[![License MIT](https://img.shields.io/badge/license-MIT-green.svg)](http://opensource.org/licenses/MIT)
 
-
-
-
-![dashboard](Content/dashboard.png)
+![dashboard](https://raw.githubusercontent.com/SerbanApostol/Hangfire.RecurringJobAdmin/master/Content/dashboard.png)
 
 A simple dashboard to manage Hangfire's recurring jobs.
 
@@ -47,11 +40,11 @@ public class RecurringJobTesting
 
 * We can create, edit jobs.
 
-![create](Content/create.png)
+![create](https://raw.githubusercontent.com/SerbanApostol/Hangfire.RecurringJobAdmin/master/Content/create.png)
 
 * We can start, stop jobs at runtime.
 
-![jobAgent](Content/jobAgent.png)
+![jobAgent](https://raw.githubusercontent.com/SerbanApostol/Hangfire.RecurringJobAdmin/master/Content/jobAgent.png)
 
 * So we can also start or stop the job using JobAgent static class.
 
@@ -70,7 +63,7 @@ public class RecurringJobTesting
 * ~~We have a new vue component to generate cron expression, made by [@JossyDevers](https://github.com/JossyDevers).~~
 It is on the TO DO list for the moment since this library doesn't use Vue
 
-![jobAgent](Content/generatecron.png)
+![jobAgent](https://raw.githubusercontent.com/SerbanApostol/Hangfire.RecurringJobAdmin/master/Content/generatecron.png)
 
 
 ## Instructions

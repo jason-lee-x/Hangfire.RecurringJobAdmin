@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-        <TargetFramework>netstandard2.0</TargetFramework>
+     <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-        <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
+     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     </PropertyGroup>
 
    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
@@ -13,28 +13,34 @@
    </PropertyGroup>
     
   <PropertyGroup>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <Authors>Brayan Mota, Serban Apostol</Authors>
-      <Copyright>Copyright © 2020-present Hangfire.Extension contributors</Copyright>
-      <NeutralLanguage>en</NeutralLanguage>
-      <PackageProjectUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</PackageProjectUrl>
-      <RepositoryUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</RepositoryUrl>
-      <Version>1.0.0</Version>
-      <PackOnBuild>true</PackOnBuild>
-      <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
+     <PackageId>RBC.Hangfire.RecurringJobAdmin</PackageId>
+     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+     <Authors>Brayan Mota, Serban Apostol</Authors>
+     <Company>N/A, Romanian Business Consult S.R.L.</Company>
+     <Copyright>Copyright © 2020-present Hangfire.Extension contributors</Copyright>
+     <NeutralLanguage>en</NeutralLanguage>
+     <PackageProjectUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</PackageProjectUrl>
+     <RepositoryUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</RepositoryUrl>
+     <Version>1.0.0</Version>
+     <PackOnBuild>true</PackOnBuild>
+     <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
+     <PackageReadmeFile>README.md</PackageReadmeFile>
+     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Dashboard\Content\css\cron-expression-input.css" />
     <None Remove="Dashboard\Content\js\cron-expression-input.js" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="." />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="." />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Dashboard\Content\css\cron-expression-input.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\cron-expression-input.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Pages\JobExtensionPage.cshtml" />
     <EmbeddedResource Include="Dashboard\Pages\JobsStopped.cshtml" />
@@ -59,22 +65,22 @@
 
   <ItemGroup>
     <Compile Update="Dashboard\Content\resx\RecurringJobAdminStrings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>RecurringJobAdminStrings.resx</DependentUpon>
+     <DesignTime>True</DesignTime>
+     <AutoGen>True</AutoGen>
+     <DependentUpon>RecurringJobAdminStrings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
 
   <ItemGroup>
     <EmbeddedResource Update="Dashboard\Content\resx\RecurringJobAdminStrings.ro.resx">
-      <SubType>Designer</SubType>
-      <LastGenOutput>RecurringJobAdminStrings - Copy.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
+     <SubType>Designer</SubType>
+     <LastGenOutput>RecurringJobAdminStrings - Copy.Designer.cs</LastGenOutput>
+     <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Dashboard\Content\resx\RecurringJobAdminStrings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>RecurringJobAdminStrings.Designer.cs</LastGenOutput>
+     <Generator>ResXFileCodeGenerator</Generator>
+     <LastGenOutput>RecurringJobAdminStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
