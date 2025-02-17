@@ -29,17 +29,16 @@ namespace Hangfire.RecurringJobAdmin
                             var attr = method.GetCustomAttribute<RecurringJobAttribute>();
                         }
 
-                        if(!JobAgent.IsValidJobId(attribute.RecurringJobId) && !JobAgent.IsValidJobId(attribute.RecurringJobId, JobAgent.tagStopJob))
+                        if (!JobAgent.IsValidJobId(attribute.RecurringJobId) && !JobAgent.IsValidJobId(attribute.RecurringJobId, JobAgent.tagStopJob))
                         {
                             _registry.Register(
                                     attribute.RecurringJobId,
                                     method,
+                                    null,
                                     attribute.Cron,
                                     string.IsNullOrEmpty(attribute.TimeZone) ? TimeZoneInfo.Utc : TimeZoneInfo.FindSystemTimeZoneById(attribute.TimeZone),
                                     attribute.Queue ?? EnqueuedState.DefaultQueue);
                         }
-
-                       
                     }
                 }
             }

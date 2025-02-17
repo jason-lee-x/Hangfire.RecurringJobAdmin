@@ -1,9 +1,4 @@
 ﻿using Hangfire.Dashboard;
-using Hangfire.Dashboard.Pages;
-using Hangfire.RecurringJobAdmin.Core;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Hangfire.RecurringJobAdmin.Pages
 {

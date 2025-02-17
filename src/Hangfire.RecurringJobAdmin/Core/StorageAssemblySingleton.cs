@@ -44,11 +44,34 @@ namespace Hangfire.RecurringJobAdmin.Core
 
         }
 
-        public bool IsValidType(string type) => currentAssembly.Any(x => x.GetType(type) != null);
+        public bool IsValidType(string type) => Type.GetType(type) != null || currentAssembly.Any(x => x.GetType(type) != null);
 
-        public bool IsValidMethod(string type, string method) => currentAssembly?
-                                                                    .FirstOrDefault(x => x.GetType(type) != null)?.GetType(type)?.GetMethod(method) != null;
+        public bool IsValidMethod(string type, string method, Type[] argTypes) => (Type.GetType(type) ?? currentAssembly?
+            .FirstOrDefault(x => x.GetType(type) != null)?.GetType(type))?.GetMethod(method, argTypes) != null;
 
-
+        public bool AreValidArguments(string type, string method, IEnumerable<object> args, Type[] argTypes)
+        {
+            if (!IsValidMethod(type, method, argTypes))
+                return false;
+            //var parameters = currentAssembly
+            //    .FirstOrDefault(x => x.GetType(type) != null)
+            //    .GetType(type)
+            //    .GetMethod(method, argTypes)
+            //    .GetParameters();
+            var argsList = args?.ToList();
+            if (argTypes?.Count() != argsList?.Count)
+            {
+                return false;
+            }
+            for (var i = 0; i < argsList.Count; i++)
+            {
+                try
+                {
+                    _ = Convert.ChangeType(argsList[i], argTypes[i]);
+                }
+                catch { return false; }
+            }
+            return true;
+        }
     }
 }

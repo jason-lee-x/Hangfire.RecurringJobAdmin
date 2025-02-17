@@ -1,0 +1,652 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using Hangfire
+@using Hangfire.Dashboard
+@using Hangfire.Dashboard.Pages
+@using Hangfire.Dashboard.Resources
+@using Hangfire.RecurringJobAdmin.Core
+@using Hangfire.RecurringJobAdmin.Dashboard.Content.resx
+@using Hangfire.RecurringJobAdmin.Models
+@using Hangfire.RecurringJobAdmin.Pages
+@using Hangfire.States
+@using Hangfire.Storage
+@using Newtonsoft.Json;
+@inherits PageBase
+@{
+    Layout = new LayoutPage(Strings.RecurringJobsPage_Title);
+    List<RecurringJobDto> recurringJobs;
+    IEnumerable<PeriodicJob> allJobs;
+
+    int from, perPage;
+
+    int.TryParse(Query("from"), out from);
+    int.TryParse(Query("count"), out perPage);
+
+    Pager pager = null;
+
+    using (var connection = Storage.GetReadOnlyConnection())
+    {
+        var storageConnection = connection as JobStorageConnection;
+        var stoppedJobs = JobAgent.GetAllJobStopped();
+        if (storageConnection != null)
+        {
+            recurringJobs = storageConnection.GetRecurringJobs(pager.FromRecord, pager.FromRecord + pager.RecordsPerPage - 1);
+            pager = new Pager(from, perPage, DashboardOptions.DefaultRecordsPerPage, storageConnection.GetRecurringJobCount() + stoppedJobs.Count);
+        }
+        else
+        {
+            recurringJobs = connection.GetRecurringJobs();
+        }
+        allJobs = recurringJobs.Select(x => new PeriodicJob
+                {
+                    Id = x.Id,
+                    Cron = x.Cron,
+                    CreatedAt = x.CreatedAt.HasValue ? x.CreatedAt.Value.ChangeTimeZone(x.TimeZoneId) : new DateTime(),
+                    Error = x.Error,
+                    LastExecution = x.LastExecution,
+                    Method = x.Job?.Method.Name,
+                    Arguments = x.Job?.Args,
+                    ArgumentsTypes = x.Job?.Method.GetParameters()?.Select(p => p.ParameterType.FullName),
+                    JobState = "Running",
+                    Class = x.Job?.Type.FullName,
+                    Queue = x.Queue,
+                    LastJobId = x.LastJobId,
+                    LastJobState = x.LastJobState,
+                    NextExecution = x.NextExecution,
+                    Removed = x.Removed,
+                    TimeZoneId = x.TimeZoneId
+                }).Concat(stoppedJobs.Skip(Math.Min(0, pager.FromRecord - recurringJobs.Count)).Take(pager.RecordsPerPage - recurringJobs.Count));
+    }
+}
+<style>
+    @@media (prefers-color-scheme: dark) {
+        .modal-content
+        {
+            background-color: #22272e;
+        }
+
+        .form-control {
+            background-color: #22272e;
+            color: #adbac7;
+            border-color: #4d4d4d;
+        }
+
+        .modal-header {
+            border-color: #4d4d4d;
+        }
+
+        .modal-footer {
+            border-color: #4d4d4d;
+        }
+
+        .well {
+            background-color: #1c2129;
+            border-color: #4d4d4d;
+        }
+    }
+</style>
+
+<div id="job_editor_modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span></button>
+                <h4 class="modal-title">@RecurringJobAdminStrings.JobExtension_JobEditor</h4>
+            </div>
+            <div class="modal-body">
+                <form id="formJob">
+
+                    <div class="form-group">
+                        <label for="jobId">@RecurringJobAdminStrings.Common_JobId</label>
+                        <input type="text" id="jobId" name="jobId" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @RecurringJobAdminStrings.Common_JobId">
+                    </div>
+                    <div class="form-group">
+                        <label for="cron">@Strings.RecurringJobsPage_Table_Cron</label>
+                        <input type="text" id="cron" name="cron" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @Strings.RecurringJobsPage_Table_Cron">
+                        <small id="cronHint" class="form-text text-muted">
+                            @RecurringJobAdminStrings.JobExtension_CronInputHint <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseCronExplaination" aria-expanded="false" aria-controls="collapseCronExplaination" style="padding: 1px 3px 0px 3px;">
+                                <span class="glyphicon glyphicon-question-sign"></span>
+                            </button>
+                            <div class="collapse" id="collapseCronExplaination">
+                                <div class="well">
+                                    @RecurringJobAdminStrings.JobExtension_CronInputDetailedExplaination
+                                </div>
+                            </div>
+                        </small>
+                        <!--<cron-expression-input id="cron" name="cron" />-->
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timezoneid">@Strings.RecurringJobsPage_Table_TimeZone</label>
+                        <select id="timezoneid" name="timezoneid" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @Strings.RecurringJobsPage_Table_TimeZone">
+                            @{
+                                int timeZoneCount = 0;
+                                @foreach (var timeZoneId in Utility.GetTimeZones())
+                                {
+                                    <option key="@(++timeZoneCount)" value="@timeZoneId.Item1">@timeZoneId.Item2</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="class">@RecurringJobAdminStrings.Common_Class</label>
+                        <input type="text" id="class" name="class" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @RecurringJobAdminStrings.Common_Class">
+                        <small id="classHint" class="form-text text-muted">@RecurringJobAdminStrings.JobExtension_ClassInputHint</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="method">@RecurringJobAdminStrings.Common_Method</label>
+                        <input type="text" id="method" name="method" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @RecurringJobAdminStrings.Common_Method">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="arguments">@RecurringJobAdminStrings.Common_Arguments</label>
+                        <input type="text" id="arguments" name="arguments" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @RecurringJobAdminStrings.Common_Arguments">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="argumentsTypes">@RecurringJobAdminStrings.Common_ArgumentsTypes</label>
+                        <input type="text" id="argumentsTypes" name="argumentsTypes" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @RecurringJobAdminStrings.Common_ArgumentsTypes">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="queue">@Strings.QueuesPage_Table_Queue</label>
+                        <input type="text" id="queue" name="queue" class="form-control" placeholder="@RecurringJobAdminStrings.Common_Input @Strings.QueuesPage_Table_Queue">
+                    </div>
+
+                    <div id="errorFormGroup" class="form-group" style="display: none;">
+                        <p style="color: red;">
+                            <b>@RecurringJobAdminStrings.JobExtension_JobEditorErrorListHeader</b>
+                            <ul id="errorListElement">
+                                <!--<li style="color:red"></li>-->
+                            </ul>
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="saveJob()">@RecurringJobAdminStrings.Common_Save</button>
+                <button id="job_editor_modal_close_button" type="button" class="btn btn-default" data-dismiss="modal">@RecurringJobAdminStrings.Common_Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 id="page-title" class="page-header">@RecurringJobAdminStrings.JobExtension_Title</h1>
+        @if (!allJobs.Any())
+        {
+            <div class="alert alert-info">
+                @Strings.RecurringJobsPage_NoJobs
+            </div>
+        }
+        else
+        {
+            <div class="js-jobs-list">
+                <div class="btn-toolbar btn-toolbar-top">
+                    @if (!IsReadOnly)
+                    {
+                        <button class="btn btn-sm btn-primary"
+                                data-toggle="modal"
+                                data-target="#job_editor_modal"
+                                onclick="setModalValuesAdd()">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </button>
+                    }
+                    @if (pager != null)
+                    {
+                        @: @Html.PerPageSelector(pager)
+                    }
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+
+                        <thead>
+                            <tr>
+                                @if (!IsReadOnly)
+                                {
+                                    <th class="min-width" style="display: none;">
+                                        <input type="checkbox" class="js-jobs-list-select-all" />
+                                    </th>
+                                }
+                                <th>@Strings.Common_Id</th>
+                                <th class="min-width">@Strings.RecurringJobsPage_Table_Cron</th>
+                                <th>@Strings.QueuesPage_Table_Queue</th>
+                                <th>@Strings.Common_State</th>
+                                <th>@RecurringJobAdminStrings.Common_Class</th>
+                                <th>@RecurringJobAdminStrings.Common_Method</th>
+                                <th>@Strings.RecurringJobsPage_Table_TimeZone</th>
+                                <th>@Strings.RecurringJobsPage_Table_NextExecution</th>
+                                <th>@Strings.RecurringJobsPage_Table_LastExecution</th>
+                                @if (!IsReadOnly)
+                                {
+                                    <th>@Strings.AwaitingJobsPage_Table_Options</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var job in allJobs)
+                            {
+                                var jobLineId = Guid.NewGuid().ToString("N");
+                                <tr class="js-jobs-list-row hover">
+                                    @if (!IsReadOnly)
+                                    {
+                                        <td rowspan="@(job.Error != null ? "2" : "1")" style="display: none;">
+                                            <input id="cb_@jobLineId" type="checkbox" class="js-jobs-list-checkbox" name="jobs[]" value="@job.Id" />
+                                        </td>
+                                    }
+                                    <td class="word-break">@job.Id</td>
+                                    <td class="min-width min-width-125p ">
+                                        @* ReSharper disable once EmptyGeneralCatchClause *@
+                                        @{
+                                            string cronDescription = null;
+                                            bool cronError = false;
+
+                                            if (!String.IsNullOrEmpty(job.Cron))
+                                            {
+                                                try
+                                                {
+                                                    RecurringJobEntity.ParseCronExpression(job.Cron);
+                                                }
+                                                catch (Exception ex)// when (ex.IsCatchableExceptionType())
+                                                {
+                                                    cronDescription = ex.Message;
+                                                    cronError = true;
+                                                }
+
+                                                if (cronDescription == null)
+                                                {
+#if FEATURE_CRONDESCRIPTOR
+                                                        try
+                                                        {
+                                                        cronDescription = CronExpressionDescriptor.ExpressionDescriptor.GetDescription(job.Cron);
+                                                        }
+                                                        catch (FormatException)
+                                                        {
+                                                        }
+#endif
+                                                }
+                                            }
+                                        }
+
+                                        @if (cronDescription != null)
+                                        {
+                                            <code title="@cronDescription" class="cron-badge">
+                                                @if (cronError)
+                                                {
+                                                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                                                }
+                                                @job.Cron
+                                            </code>
+                                        }
+                                        else
+                                        {
+                                            <code class="cron-badge">@job.Cron</code>
+                                        }
+                                    </td>
+                                    <td class="word-break">@job.Queue</td>
+                                    @if (job.JobState == "Running")
+                                    {
+                                        <td><span class="label label-success text-uppercase">@RecurringJobAdminStrings.Common_Enabled</span></td>
+                                    }
+                                    else
+                                    {
+                                        <td><span class="label label-danger text-uppercase">@Strings.Common_Disabled</span></td>
+                                    }
+                                    <td class="word-break">@job.Class</td>
+                                    <td class="word-break">@job.Method</td>
+                                    <td>
+                                        @if (!String.IsNullOrWhiteSpace(job.TimeZoneId))
+                                        {
+                                            string displayName;
+                                            Exception exception = null;
+
+                                            try
+                                            {
+                                                var resolver = DashboardOptions.TimeZoneResolver ?? new DefaultTimeZoneResolver();
+                                                displayName = resolver.GetTimeZoneById(job.TimeZoneId).DisplayName;
+                                            }
+                                            catch (Exception ex)// when (ex.IsCatchableExceptionType())
+                                            {
+                                                displayName = null;
+                                                exception = ex;
+                                            }
+
+                                            <span title="@displayName" data-container="body">
+                                                @job.TimeZoneId
+                                                @if (exception != null)
+                                                {
+                                                    <span class="glyphicon glyphicon-exclamation-sign" title="@exception.Message"></span>
+                                                }
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            @: UTC
+                                        }
+                                    </td>
+                                    <td class="align-right min-width">
+                                        @if (!job.NextExecution.HasValue)
+                                        {
+                                            if (job.Error != null)
+                                            {
+                                                <span class="label label-danger text-uppercase">@Strings.Common_Error</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="label label-default text-uppercase" title="@Strings.RecurringJobsPage_RecurringJobDisabled_Tooltip">@Strings.Common_Disabled</span>
+                                            }
+
+                                        }
+                                        else if (job.RetryAttempt > 0)
+                                        {
+                                            <span class="label label-warning">@Html.RelativeTime(job.NextExecution.Value)</span>
+                                        }
+                                        else
+                                        {
+                                            @Html.RelativeTime(job.NextExecution.Value)
+                                        }
+                                    </td>
+                                    <td class="align-right min-width">
+                                        @if (job.LastExecution != null)
+                                        {
+                                            if (!String.IsNullOrEmpty(job.LastJobId))
+                                            {
+                                                <a href="@Url.JobDetails(job.LastJobId)" class="text-decoration-none">
+                                                    @{
+                                                        var cssSuffix = JobHistoryRenderer.GetStateCssSuffix(job.LastJobState ?? EnqueuedState.StateName);
+                                                    }
+                                                    @if (cssSuffix != null)
+                                                    {
+                                                        <span class="label label-default label-hover label-state-@cssSuffix">
+                                                            @Html.RelativeTime(job.LastExecution.Value)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="label label-default label-hover" style="@($"background-color: {JobHistoryRenderer.GetForegroundStateColor(job.LastJobState ?? EnqueuedState.StateName)};")">
+                                                            @Html.RelativeTime(job.LastExecution.Value)
+                                                        </span>
+                                                    }
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <em>
+                                                    @Strings.RecurringJobsPage_Canceled @Html.RelativeTime(job.LastExecution.Value)
+                                                </em>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <em>@Strings.Common_NotAvailable</em>
+                                        }
+                                    </td>
+                                    @if (!IsReadOnly)
+                                    {
+                                        <td class="align-right min-width">
+                                            <button class="btn btn-sm btn-primary"
+                                                    data-toggle="modal"
+                                                    data-target="#job_editor_modal"
+                                                    onclick="setModalValuesEdit('@job.Id', '@job.Cron', '@job.TimeZoneId', '@job.Class', '@job.Method', '@JsonConvert.SerializeObject(job.Arguments).Replace("\"", "&quot;").Replace("\\", "\\\\")', '@JsonConvert.SerializeObject(job.ArgumentsTypes).Replace("\"", "&quot;")', '@job.Queue')">
+                                                <span class="glyphicon glyphicon-pencil"></span>
+                                            </button>
+                                            @if (job.JobState == "Running")
+                                            {
+                                                <button class="btn btn-sm btn-danger"
+                                                        onclick="activateButton('@jobLineId', 'stop')">
+                                                    <span class="glyphicon glyphicon-stop"></span>
+                                                </button>
+                                                <button id="btn_stop_@jobLineId"
+                                                        class="js-jobs-list-command btn btn-sm btn-danger"
+                                                        data-url="@(Url.To("/JobConfiguration/JobAgent?Id=" + job.Id + "&Action=Stop"))"
+                                                        style="display: none;">
+                                                    <span class="glyphicon glyphicon-stop"></span>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-success"
+                                                        onclick="activateButton('@jobLineId', 'start')">
+                                                    <span class="glyphicon glyphicon-play-circle"></span>
+                                                </button>
+                                                <button id="btn_start_@jobLineId"
+                                                        class="js-jobs-list-command btn btn-sm btn-success"
+                                                        data-url="@(Url.To("/JobConfiguration/JobAgent?Id=" + job.Id + "&Action=Start"))"
+                                                        style="display: none;">
+                                                    <span class="glyphicon glyphicon-play-circle"></span>
+                                                </button>
+                                            }
+                                            <button class="btn btn-sm btn-warning"
+                                                    onclick="activateButton('@jobLineId', 'remove')">
+                                                <span class="glyphicon glyphicon-remove"></span>
+                                            </button>
+                                            <button id="btn_remove_@jobLineId"
+                                                    class="js-jobs-list-command btn btn-sm btn-warning"
+                                                    data-url="@(Url.To("/JobConfiguration/JobAgent?Id=" + job.Id + "&Action=Remove"))"
+                                                    data-confirm="@string.Format(RecurringJobAdminStrings.Common_DeleteThisJobConfirm, job.Id)"
+                                                    style="display: none;">
+                                                <span class="glyphicon glyphicon-remove"></span>
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                                @if (job.Error != null)
+                                {
+                                    <tr>
+                                        <td colspan="@(IsReadOnly ? "9" : "11")" class="failed-job-details">
+                                            <pre class="stack-trace"><code>@Html.StackTrace(job.Error)</code></pre>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+
+                @if (pager != null)
+                {
+                    @: @Html.Paginator(pager)
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function activateButton(lineId, buttonType) {
+        let cb = document.getElementById("cb_" + lineId);
+        let btn = document.getElementById("btn_" + buttonType + "_" + lineId);
+        if (cb && btn) {
+            if (!cb.checked) {
+                cb.click();
+            }
+            btn.click();
+        }
+    }
+
+    var jobIdElement;
+    var cronElement;
+    var timezoneidElement;
+    var classElement;
+    var methodElement;
+    var argumentsElement;
+    var argumentsTypesElement;
+    var queueElement;
+    var errorFormGroupElement;
+    var errorListElement;
+    var closeModalButton;
+
+    function populateFormElements() {
+        jobIdElement = document.getElementById('jobId');
+        cronElement = document.getElementById('cron');
+        timezoneidElement = document.getElementById('timezoneid');
+        classElement = document.getElementById('class');
+        methodElement = document.getElementById('method');
+        argumentsElement = document.getElementById('arguments');
+        argumentsTypesElement = document.getElementById('argumentsTypes');
+        queueElement = document.getElementById('queue');
+        errorFormGroupElement = document.getElementById('errorFormGroup');
+        errorListElement = document.getElementById('errorListElement');
+        closeModalButton = document.getElementById('job_editor_modal_close_button');
+    }
+
+    function setModalValuesAdd() {
+        if (!(jobIdElement !== null && jobIdElement !== undefined)) {
+            populateFormElements();
+        }
+
+        if (jobIdElement !== null && jobIdElement !== undefined) {
+            jobIdElement.value = '';
+        }
+        if (cronElement !== null && cronElement !== undefined) {
+            cronElement.value = '@Cron.Never()';
+        }
+        if (timezoneidElement !== null && timezoneidElement !== undefined) {
+            timezoneidElement.value = '@TimeZoneInfo.Local.Id';
+        }
+        if (classElement !== null && classElement !== undefined) {
+            classElement.value = '';
+        }
+        if (methodElement !== null && methodElement !== undefined) {
+            methodElement.value = '';
+        }
+        if (argumentsElement !== null && argumentsElement !== undefined) {
+            argumentsElement.value = '[]';
+        }
+        if (argumentsTypesElement !== null && argumentsTypesElement !== undefined) {
+            argumentsTypesElement.value = '[]';
+        }
+        if (queueElement !== null && queueElement !== undefined) {
+            queueElement.value = '@EnqueuedState.DefaultQueue';
+        }
+        if (errorFormGroupElement !== null && errorFormGroupElement !== undefined) {
+            errorFormGroupElement.style.display = 'none';
+        }
+        if (errorListElement !== null && errorListElement !== undefined) {
+            errorListElement.innerHTML = '';
+        }
+    }
+
+    function setModalValuesEdit(jobId, cron, timeZoneId, className, methodName, argumentsJson, argumentsTypesJson, queue) {
+        if (!(jobIdElement !== null && jobIdElement !== undefined)) {
+            populateFormElements();
+        }
+
+        if (jobIdElement !== null && jobIdElement !== undefined) {
+            jobIdElement.value = jobId;
+        }
+        if (cronElement !== null && cronElement !== undefined) {
+            cronElement.value = cron;
+        }
+        if (timezoneidElement !== null && timezoneidElement !== undefined) {
+            timezoneidElement.value = timeZoneId;
+        }
+        if (classElement !== null && classElement !== undefined) {
+            classElement.value = className;
+        }
+        if (methodElement !== null && methodElement !== undefined) {
+            methodElement.value = methodName;
+        }
+        if (argumentsElement !== null && argumentsElement !== undefined) {
+            argumentsElement.value = argumentsJson;
+        }
+        if (argumentsTypesElement !== null && argumentsTypesElement !== undefined) {
+            argumentsTypesElement.value = argumentsTypesJson;
+        }
+        if (queueElement !== null && queueElement !== undefined) {
+            queueElement.value = queue;
+        }
+        if (errorFormGroupElement !== null && errorFormGroupElement !== undefined) {
+            errorFormGroupElement.style.display = 'none';
+        }
+        if (errorListElement !== null && errorListElement !== undefined) {
+            errorListElement.innerHTML = '';
+        }
+    }
+
+    function saveJob() {
+        if (!(jobIdElement !== null && jobIdElement !== undefined)) {
+            populateFormElements();
+        }
+
+        let saveJobUrlParameters = "?";
+        if (jobIdElement !== null && jobIdElement !== undefined) {
+            saveJobUrlParameters += "Id=" + jobIdElement.value + "&";
+        }
+        if (cronElement !== null && cronElement !== undefined) {
+            saveJobUrlParameters += "Cron=" + cronElement.value + "&";
+        }
+        if (timezoneidElement !== null && timezoneidElement !== undefined) {
+            saveJobUrlParameters += "TimeZoneId=" + timezoneidElement.value + "&";
+        }
+        if (classElement !== null && classElement !== undefined) {
+            saveJobUrlParameters += "Class=" + classElement.value + "&";
+        }
+        if (methodElement !== null && methodElement !== undefined) {
+            saveJobUrlParameters += "Method=" + methodElement.value + "&";
+        }
+        if (argumentsElement !== null && argumentsElement !== undefined) {
+            saveJobUrlParameters += "Arguments=" + argumentsElement.value + "&";
+        }
+        if (argumentsTypesElement !== null && argumentsTypesElement !== undefined) {
+            saveJobUrlParameters += "ArgumentsTypes=" + argumentsTypesElement.value + "&";
+        }
+        if (queueElement !== null && queueElement !== undefined) {
+            saveJobUrlParameters += "Queue=" + queueElement.value + "&";
+        }
+        if (errorFormGroupElement !== null && errorFormGroupElement !== undefined) {
+            errorFormGroupElement.style.display = 'none';
+        }
+
+        const baseUrl = "@Url.To("/JobConfiguration/UpdateJobs")";
+        const method = "GET";
+        const timeout = 100000; // 100 seconds
+        let url = baseUrl + saveJobUrlParameters.slice(0, -1);
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function () {
+            try {
+                let saveJobResponse = JSON.parse(this.response);
+                //console.log(this.response);
+                if (saveJobResponse.Status != true) {
+                    if (saveJobResponse.Message) {
+                        errorListElement.innerHTML = '<li style="color: red;">' + saveJobResponse.Message + '</li>';
+                    } else if (saveJobResponse.Messages) {
+                        errorListElement.innerHTML = '<li style="color: red;">' + saveJobResponse.Messages.join('</li><li style="color: red;">') + '</li>';
+                    } else {
+                        errorListElement.innerHTML = '<li style="color: red;">' + this.response + '</li>';
+                    }
+                    errorFormGroupElement.style.display = 'block';
+                } else {
+                    errorListElement.innerHTML = '';
+                    closeModalButton.click();
+                    window.location.reload();
+                }
+            }
+            catch (error) {
+                console.error("Status: " + this.status + ", URL: " + url + ", HTTP Method: " + method + ", Error: " + error.message + ", Response text: " + this.responseText);
+                errorFormGroupElement.style.display = 'block';
+                errorListElement.innerHTML = '<li style="color: red;">' + this.responseText + '</li>';
+            }
+        }
+        xhttp.onerror = function () {
+            console.error("Status: " + this.status + ", URL: " + url + ", HTTP Method: " + method + ", Error: " + "Communication error");
+            errorFormGroupElement.style.display = 'block';
+            errorListElement.innerHTML = '<li style="color: red;">@RecurringJobAdminStrings.JobExtension_CommunicationError</li>';
+        };
+        xhttp.ontimeout = function () {
+            console.error("Status: " + this.status + ", URL: " + url + ", HTTP Method: " + method + ", Error: " + "Timeout");
+            errorFormGroupElement.style.display = 'block';
+            errorListElement.innerHTML = '<li style="color: red;">@RecurringJobAdminStrings.JobExtension_Timeout</li>';
+        };
+        xhttp.timeout = timeout;
+        xhttp.open(method, url);
+
+        xhttp.send();
+    }
+</script>

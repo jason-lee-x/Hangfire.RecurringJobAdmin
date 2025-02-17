@@ -3,10 +3,7 @@ using Hangfire.RecurringJobAdmin.Models;
 using Hangfire.Storage;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Text;
 
 namespace Hangfire.RecurringJobAdmin.Core
 {
@@ -34,6 +31,19 @@ namespace Hangfire.RecurringJobAdmin.Core
                 transaction.Commit();
             }
         }
+        public static void RemoveBackgroundJob(string JobId)
+        {
+            using (var connection = JobStorage.Current.GetConnection())
+            using (connection.AcquireDistributedLock($"lock:recurring-job:{JobId}", TimeSpan.FromSeconds(15)))
+            using (var transaction = connection.CreateWriteTransaction())
+            {
+                transaction.RemoveHash($"recurring-job:{JobId}");
+                transaction.RemoveFromSet("recurring-jobs", JobId);
+                transaction.RemoveFromSet(tagStopJob, JobId);
+
+                transaction.Commit();
+            }
+        }
 
         public static List<PeriodicJob> GetAllJobStopped()
         {
@@ -57,7 +67,9 @@ namespace Hangfire.RecurringJobAdmin.Core
                             var invocationData = InvocationData.DeserializePayload(payload);
                             var job = invocationData.DeserializeJob();
                             dto.Method = job.Method.Name;
-                            dto.Class = job.Type.Name;
+                            dto.Class = job.Type.FullName;
+                            dto.Arguments = job.Args;
+                            dto.ArgumentsTypes = job.Method.GetParameters()?.Select(p => p.ParameterType.FullName);
                         }
                     }
                     catch (JobLoadException ex)
@@ -74,7 +86,7 @@ namespace Hangfire.RecurringJobAdmin.Core
                     {
                         var tempNextExecution = JobHelper.DeserializeNullableDateTime(dataJob["NextExecution"]);
 
-                        dto.NextExecution = tempNextExecution.HasValue ? tempNextExecution.Value.ChangeTimeZone(dto.TimeZoneId).ToString("G") : "N/A";
+                        dto.NextExecution = tempNextExecution;
                     }
 
                     if (dataJob.ContainsKey("LastJobId") && !string.IsNullOrWhiteSpace(dataJob["LastJobId"]))
@@ -93,12 +105,17 @@ namespace Hangfire.RecurringJobAdmin.Core
                         dto.Queue = dataJob["Queue"];
                     }
 
+                    if (dataJob.ContainsKey("Cron"))
+                    {
+                        dto.Cron = dataJob["Cron"];
+                    }
+
                     if (dataJob.ContainsKey("LastExecution"))
                     {
-                        
+
                         var tempLastExecution = JobHelper.DeserializeNullableDateTime(dataJob["LastExecution"]);
 
-                        dto.LastExecution = tempLastExecution.HasValue ? tempLastExecution.Value.ChangeTimeZone(dto.TimeZoneId).ToString("G") : "N/A";
+                        dto.LastExecution = tempLastExecution;
                     }
 
                     if (dataJob.ContainsKey("CreatedAt"))
@@ -122,6 +139,18 @@ namespace Hangfire.RecurringJobAdmin.Core
             return outPut;
         }
 
+        public static List<RecurringJobDto> GetStoppedRecurringJobs(IStorageConnection connection)
+        {
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
+
+            HashSet<string> allItemsFromSet = connection.GetAllItemsFromSet(tagStopJob);
+            var getRecurringJobDtos = typeof(Hangfire.Storage.StorageConnectionExtensions).GetMethod("GetRecurringJobDtos", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+            return (List<RecurringJobDto>)getRecurringJobDtos?.Invoke(null, new object[] { connection, allItemsFromSet });
+        }
+
         public static bool IsValidJobId(string jobId, string tag = tagRecurringJob)
         {
             var result = false;
@@ -133,7 +162,5 @@ namespace Hangfire.RecurringJobAdmin.Core
             }
             return result;
         }
-
-      
     }
 }

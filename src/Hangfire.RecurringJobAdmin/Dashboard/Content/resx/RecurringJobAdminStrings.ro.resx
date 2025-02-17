@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common_Arguments" xml:space="preserve">
+    <value>Argumente</value>
+  </data>
+  <data name="Common_ArgumentsTypes" xml:space="preserve">
+    <value>Tipuri de argumente</value>
+  </data>
+  <data name="Common_Class" xml:space="preserve">
+    <value>Clasa</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Inchide</value>
+  </data>
+  <data name="Common_DeleteThisJobConfirm" xml:space="preserve">
+    <value>Sunteti sigur(a) ca doriti sa STERGETI procedura {0}?</value>
+  </data>
+  <data name="Common_Enabled" xml:space="preserve">
+    <value>Activ</value>
+  </data>
+  <data name="Common_Input" xml:space="preserve">
+    <value>Intruduceti</value>
+  </data>
+  <data name="Common_JobId" xml:space="preserve">
+    <value>ID Procedura</value>
+  </data>
+  <data name="Common_Method" xml:space="preserve">
+    <value>Metoda</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Salveaza</value>
+  </data>
+  <data name="JobExtension_ClassInputHint" xml:space="preserve">
+    <value>Va rugam sa introduceti calea inctreaga catre clasa! De exemplu: My.Namespace.MyClass</value>
+  </data>
+  <data name="JobExtension_CommunicationError" xml:space="preserve">
+    <value>Eroare de comunicare</value>
+  </data>
+  <data name="JobExtension_CronInputDetailedExplaination" xml:space="preserve">
+    <value>(s?) - secunde, optional; (m) - minute, obligatoriu; (o) - ore, obligatoriu; (z) - zi din luna, obligatoriu; (l) - luna din an, obligatoriu; (zs) - zi a saptamanii, obligatoriu
+&lt;br /&gt;Valori posibile: * = valoarea nu este luata in considerare; numar = executa exact la numarul precizat; numar-numar = interval in care sa se execute; */2 = executa din 2 in 2 unitati incepand cu 0; numar/3 = executa din 3 in 3 unitati, incepand cu numarul, pana la ultima unitate; numar-numar/3 = executa din 3 in 3 unitati in interval, incepand cu primul numar; numar,numar,numar = executa exact la unitatile specificate in lista; * * 31 02 * = nu executa niciodata (31 februarie)
+&lt;br /&gt;Pentru clarificari, vezi &lt;a href="https://crontab.guru/" target="blank"&gt;https://crontab.guru/&lt;/a&gt; sau cauta cron / crontab (expression)</value>
+    <comment>(s?) - seconds, optional; (m) - minutes, mandatory; (h) - hours, mandatory; (d) - day of the month, mandatory; (M) - month of the year, mandatory; (wd) - day of the week, mandatory
+&lt;br /&gt;Possible values: * = value is not considered; number = execute exactly at the specified number; number-number = range in which to execute; */2 = execute every 2 units starting from 0; number/3 = execute every 3 units starting at the number, up to the last unit; number-number/3 = execute every 3 units in the range, starting at the lower number; number,number,number = execute on the exact units specified in the list; * * 31 02 * = never execute (31st February)
+&lt;br /&gt;For clarifications, see &lt;a href="https://crontab.guru/" target="blank"&gt;https://crontab.guru/&lt;/a&gt; or search cron / crontab (expression)</comment>
+  </data>
+  <data name="JobExtension_CronInputHint" xml:space="preserve">
+    <value>Format: (s?) (m) (o) (z) (l) (zs). Explicatie: </value>
+  </data>
+  <data name="JobExtension_JobEditor" xml:space="preserve">
+    <value>Editor de procedura</value>
+  </data>
+  <data name="JobExtension_JobEditorErrorListHeader" xml:space="preserve">
+    <value>Va rog sa corectati urmatoarele erori:</value>
+  </data>
+  <data name="JobExtension_Timeout" xml:space="preserve">
+    <value>Expirare timp</value>
+  </data>
+  <data name="JobExtension_Title" xml:space="preserve">
+    <value>Configurare Proceduri</value>
+  </data>
+  <data name="StoppedJobsPage_NoJobs" xml:space="preserve">
+    <value>Nu aveti proceduri oprite.</value>
+  </data>
+  <data name="StoppedJobsPage_Title" xml:space="preserve">
+    <value>Proceduri oprite</value>
+  </data>
+</root>

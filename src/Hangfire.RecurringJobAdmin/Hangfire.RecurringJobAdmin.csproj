@@ -26,52 +26,18 @@
 
   <ItemGroup>
     <None Remove="Dashboard\Content\css\cron-expression-input.css" />
-    <None Remove="Dashboard\Content\css\JobExtension.css" />
-    <None Remove="Dashboard\Content\js\axios.min.js" />
     <None Remove="Dashboard\Content\js\cron-expression-input.js" />
-    <None Remove="Dashboard\Content\js\daysjs.min.js" />
-    <None Remove="Dashboard\Content\js\jobextension.js" />
-    <None Remove="Dashboard\Content\js\relativeTime.min.js" />
-    <None Remove="Dashboard\Content\js\sweetalert.js" />
-    <None Remove="Dashboard\Content\js\vue.js" />
-    <None Remove="Dashboard\Content\js\vuejs-paginate.js" />
-    <None Remove="Dashboard\JobExtension.html" />
-    <None Remove="Dashboard\JobsStopped.html" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Dashboard\Content\css\cron-expression-input.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\css\JobExtension.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\axios.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Content\js\cron-expression-input.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\relativeTime.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\jobextension.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\daysjs.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\sweetalert.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\vuejs-paginate.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\vue.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\JobsStopped.html" />
-    <EmbeddedResource Include="Dashboard\JobExtension.html" />
+    <EmbeddedResource Include="Dashboard\Pages\JobExtensionPage.cshtml" />
+    <EmbeddedResource Include="Dashboard\Pages\JobsStopped.cshtml" />
   </ItemGroup>
 
   <!--<ItemGroup>
@@ -85,9 +51,31 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Cronos" Version="0.7.0" />
-    <PackageReference Include="HangFire.Core" Version="1.7.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Cronos" Version="0.8.3" />
+    <PackageReference Include="HangFire.Core" Version="1.8.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Update="Dashboard\Content\resx\RecurringJobAdminStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RecurringJobAdminStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Update="Dashboard\Content\resx\RecurringJobAdminStrings.ro.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>RecurringJobAdminStrings - Copy.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Dashboard\Content\resx\RecurringJobAdminStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RecurringJobAdminStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

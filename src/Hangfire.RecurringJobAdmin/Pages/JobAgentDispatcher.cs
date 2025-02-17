@@ -40,6 +40,11 @@ namespace Hangfire.RecurringJobAdmin.Pages
                 JobAgent.StartBackgroundJob(jobId);
             }
 
+            if ("Remove".Equals(action))
+            {
+                JobAgent.RemoveBackgroundJob(jobId);
+            }
+
             context.Response.StatusCode = (int)HttpStatusCode.OK;
             await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
         }
