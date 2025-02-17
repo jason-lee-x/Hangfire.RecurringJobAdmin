@@ -14,11 +14,11 @@
     
   <PropertyGroup>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <Authors>Brayan Mota</Authors>
+      <Authors>Brayan Mota, Serban Apostol</Authors>
       <Copyright>Copyright © 2020-present Hangfire.Extension contributors</Copyright>
       <NeutralLanguage>en</NeutralLanguage>
-      <PackageProjectUrl>https://github.com/bamotav/Hangfire.RecurringJobAdmin.git</PackageProjectUrl>
-      <RepositoryUrl>https://github.com/bamotav/Hangfire.RecurringJobAdmin.git</RepositoryUrl>
+      <PackageProjectUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</PackageProjectUrl>
+      <RepositoryUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</RepositoryUrl>
       <Version>1.0.0</Version>
       <PackOnBuild>true</PackOnBuild>
       <Description>A dashboard to manage Hangfire's recurring jobs.</Description>

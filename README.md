@@ -1,7 +1,6 @@
 # Hangfire.RecurringJobAdmin
 [![NuGet](https://buildstats.info/nuget/Hangfire.RecurringJobAdmin)](https://www.nuget.org/packages/Hangfire.RecurringJobAdmin/)
-[![Build status](https://ci.appveyor.com/api/projects/status/u2xrias2vk727beg/branch/master?svg=true)](https://ci.appveyor.com/project/bamotav/hangfire-recurringjobadmin/branch/master)
-[![Build Status](https://github.com/bamotav/Hangfire.RecurringJobAdmin/workflows/CI-HRJ/badge.svg)](https://github.com/bamotav/Hangfire.RecurringJobAdmin/actions)
+[![Build Status](https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin/workflows/CI-HRJ/badge.svg)](https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin/actions)
 [![Official Site](https://img.shields.io/badge/site-hangfire.io-blue.svg)](http://hangfire.io)
 [![License MIT](https://img.shields.io/badge/license-MIT-green.svg)](http://opensource.org/licenses/MIT)
 
@@ -12,7 +11,7 @@
 
 A simple dashboard to manage Hangfire's recurring jobs.
 
-This repo is an extension for [Hangfire](https://github.com/HangfireIO/Hangfire) based on ["Hangfire.Recurring Job Extensions"](https://github.com/icsharp/Hangfire.RecurringJobExtensions/) package made by vigoss, thanks for your contribution to the community. It contains the following functionalities: 
+This repo is an extension for [Hangfire](https://github.com/HangfireIO/Hangfire) based on [Hangfire.RecurringJobAdmin](https://github.com/bamotav/Hangfire.RecurringJobAdmin) package made by [bamotav](https://github.com/bamotav), thanks for your contribution to the community. It contains the following functionalities: 
 
 * We can use RecurringJobAttribute stored in database and presented in the administrator.
 
@@ -62,11 +61,14 @@ public class RecurringJobTesting
    
    JobAgent.StartBackgroundJob("Enter the Job Id");
    
+   JobAgent.RemoveBackgroundJob("Enter the Job Id");
+   
    //Get all stopped jobs:
    var StoppedJobs = JobAgent.GetAllJobStopped();
    
 ```
-* We have a new vue component to generate cron expression, made by [@JossyDevers](https://github.com/JossyDevers).
+* ~~We have a new vue component to generate cron expression, made by [@JossyDevers](https://github.com/JossyDevers).~~
+It is on the TO DO list for the moment since this library doesn't use Vue
 
 ![jobAgent](Content/generatecron.png)
 
@@ -85,24 +87,32 @@ for service side:
 services.AddHangfire(config => config.UseSqlServerStorage(Configuration.GetConnectionString("HangfireConnection"))
                                                  .UseRecurringJobAdmin(typeof(Startup).Assembly))
 ```
+recommended:
+```csharp
+services.AddHangfire(config => config.UseSqlServerStorage(Configuration.GetConnectionString("HangfireConnection"))
+                                                 .UseRecurringJobAdmin(typeof(Startup).Assembly, typeof(Hangfire.Server.PerformContext).Assembly))
+```
 
 ## For NetFramework  :
 for startup side:
 ```csharp
 GlobalConfiguration.Configuration.UseSqlServerStorage("HangfireConnection").UseRecurringJobAdmin(typeof(Startup).Assembly)
 ```
+recommended:
+```csharp
+GlobalConfiguration.Configuration.UseSqlServerStorage("HangfireConnection").UseRecurringJobAdmin(typeof(Startup).Assembly, typeof(Hangfire.Server.PerformContext).Assembly)
+```
 
 ## Credits
  * Braulio Alvarez
+ * Brayan Mota (bamotav)
  
 ## Donation
-If this project help you reduce time to develop, you can give me a cup of coffee :) 
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=KTW8JH379NXQL&item_name=+&currency_code=USD&source=url)
+If this project help you reduce time to develop, check out the fork source project: [Hangfire.RecurringJobAdmin](https://github.com/bamotav/Hangfire.RecurringJobAdmin)
 
 
 ## License
-Authored by: Brayan Mota (bamotav)
+Authored by: Serban Apostol (SerbanApostol)
 
 This project is under MIT license. You can obtain the license copy [here](https://github.com/bamotav/Hangfire.RecurringJobAdmin/blob/master/LICENSE).
 

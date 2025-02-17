@@ -6,9 +6,9 @@ using System.Text;
 
 namespace Hangfire.RecurringJobAdmin
 {
-    public class DisableConcurrentlyJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
+    public class DisableConcurrentJobExecutionAttribute : JobFilterAttribute, IElectStateFilter
     {
-        public DisableConcurrentlyJobExecutionAttribute() { }
+        public DisableConcurrentJobExecutionAttribute() { }
 
 
         public readonly int _from = 0;
@@ -21,7 +21,7 @@ namespace Hangfire.RecurringJobAdmin
         /// 
         /// </summary>
         /// <param name="methodName"></param>
-        public DisableConcurrentlyJobExecutionAttribute(string methodName)
+        public DisableConcurrentJobExecutionAttribute(string methodName)
         {
             if (string.IsNullOrEmpty(methodName)) throw new ArgumentNullException(nameof(methodName));
 
@@ -29,7 +29,7 @@ namespace Hangfire.RecurringJobAdmin
 
         }
 
-        public DisableConcurrentlyJobExecutionAttribute(string methodName, JobState jobState = JobState.DeletedState)
+        public DisableConcurrentJobExecutionAttribute(string methodName, JobState jobState = JobState.DeletedState)
         {
             if (string.IsNullOrEmpty(methodName)) throw new ArgumentNullException(nameof(methodName));
 
@@ -45,7 +45,7 @@ namespace Hangfire.RecurringJobAdmin
         /// <param name="methodName"></param>
         /// <param name="from"></param>
         /// <param name="count"></param>
-        public DisableConcurrentlyJobExecutionAttribute(string methodName, int from = 0, int count = 2000, JobState jobState = JobState.DeletedState)
+        public DisableConcurrentJobExecutionAttribute(string methodName, int from = 0, int count = 2000, JobState jobState = JobState.DeletedState)
         {
             if (string.IsNullOrEmpty(methodName)) throw new ArgumentNullException(nameof(methodName));
             _jobState = jobState;
@@ -61,7 +61,7 @@ namespace Hangfire.RecurringJobAdmin
         /// <param name="from"></param>
         /// <param name="count"></param>
         /// <param name="reason"></param>
-        public DisableConcurrentlyJobExecutionAttribute(string methodName, int from = 0, int count = 2000, string reason = "It is not allowed to perform multiple same tasks.", JobState jobState = JobState.DeletedState)
+        public DisableConcurrentJobExecutionAttribute(string methodName, int from = 0, int count = 2000, string reason = "It is not allowed to perform multiple same tasks.", JobState jobState = JobState.DeletedState)
         {
             if (string.IsNullOrEmpty(methodName)) throw new ArgumentNullException(nameof(methodName));
 
@@ -122,7 +122,7 @@ namespace Hangfire.RecurringJobAdmin
                             break;
                     }
 
-                    //The others state is comming soon.
+                    //The others state is coming soon.
                     return;
                 }
             }

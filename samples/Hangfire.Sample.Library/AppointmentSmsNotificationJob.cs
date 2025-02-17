@@ -14,7 +14,7 @@ namespace Hangfire.Sample.Library
         }
 
         [RecurringJob("*/1 * * * *", "default", RecurringJobId = "RunDelayJob")]
-        [DisableConcurrentlyJobExecution(nameof(RunDelayJob), jobState: JobState.EnqueuedState)]
+        [DisableConcurrentJobExecution(nameof(RunDelayJob), jobState: JobState.EnqueuedState)]
         public async Task RunDelayJob()
         {
             var id = Guid.NewGuid();
@@ -24,7 +24,7 @@ namespace Hangfire.Sample.Library
         }
 
         [RecurringJob("*/1 * * * *", "default", RecurringJobId = "DoThis")]
-        [DisableConcurrentlyJobExecution(nameof(DoThis))]
+        [DisableConcurrentJobExecution(nameof(DoThis))]
         [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public async Task DoThis()
         {
