@@ -47,7 +47,13 @@ namespace Hangfire.RecurringJobAdmin.Core
         /// <returns></returns>
         public static bool IsValidSchedule(string schedule)
         {
-            return CronExpression.TryParse(schedule, out _) /*&& Regex.IsMatch(schedule, regexCron)*/;
+            var format = CronFormat.Standard;
+            string[] array = schedule.Split(new char[2] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (array.Length == 6)
+            {
+                format |= CronFormat.IncludeSeconds;
+            }
+            return CronExpression.TryParse(schedule, format, out _) /*&& Regex.IsMatch(schedule, regexCron)*/;
         }
 
         public static string FormatKey(string serverId) => "utilization:" + serverId;
