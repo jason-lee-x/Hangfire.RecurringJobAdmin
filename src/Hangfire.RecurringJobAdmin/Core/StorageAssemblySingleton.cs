@@ -40,8 +40,32 @@ namespace Hangfire.RecurringJobAdmin.Core
                                 .ToList();
 
                 toLoad.ForEach(path => currentAssembly.Add(Assembly.LoadFile(path)));
+                LoadReferences(currentAssembly, currentAssembly);
             }
+        }
 
+        internal void LoadReferences(List<Assembly> assembliesToLoadReferences, List<Assembly> allLoadedAssemblies)
+        {
+            var newlyLoadedAssemblies = new List<Assembly>();
+            foreach (var assembly in assembliesToLoadReferences)
+            {
+                foreach (var referencedAssemblyName in assembly.GetReferencedAssemblies().Where(an => !allLoadedAssemblies.Any(a => a.FullName == an.FullName)))
+                {
+                    try
+                    {
+                        newlyLoadedAssemblies.Add(Assembly.Load(referencedAssemblyName));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                }
+            }
+            if (newlyLoadedAssemblies.Count > 0)
+            {
+                allLoadedAssemblies.AddRange(newlyLoadedAssemblies);
+                LoadReferences(newlyLoadedAssemblies, allLoadedAssemblies);
+            }
         }
 
         public bool IsValidType(string type) => Type.GetType(type) != null || currentAssembly.Any(x => x.GetType(type) != null);

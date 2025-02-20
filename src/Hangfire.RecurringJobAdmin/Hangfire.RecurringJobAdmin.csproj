@@ -29,19 +29,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Dashboard\Content\css\cron-expression-input.css" />
-    <None Remove="Dashboard\Content\js\cron-expression-input.js" />
     <None Include="..\..\README.md" Pack="true" PackagePath="." />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="." />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Dashboard\Content\css\cron-expression-input.css">
-     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dashboard\Content\js\cron-expression-input.js">
-     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dashboard\Pages\JobExtensionPage.cshtml" />
     <EmbeddedResource Include="Dashboard\Pages\JobsStopped.cshtml" />
   </ItemGroup>
@@ -82,6 +74,12 @@
      <Generator>ResXFileCodeGenerator</Generator>
      <LastGenOutput>RecurringJobAdminStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Dashboard\Content\css\" />
+    <Folder Include="Dashboard\Content\js\" />
   </ItemGroup>
 
 </Project>

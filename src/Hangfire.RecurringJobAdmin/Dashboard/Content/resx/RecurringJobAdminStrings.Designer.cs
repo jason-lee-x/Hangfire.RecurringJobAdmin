@@ -169,6 +169,177 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Content.resx {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choice.
+        /// </summary>
+        internal static string JobExtension_Cron_Choice {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Choice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Days.
+        /// </summary>
+        internal static string JobExtension_Cron_Days {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every.
+        /// </summary>
+        internal static string JobExtension_Cron_Every {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Every", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Friday.
+        /// </summary>
+        internal static string JobExtension_Cron_Friday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Friday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hours.
+        /// </summary>
+        internal static string JobExtension_Cron_Hours {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Hours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Up To.
+        /// </summary>
+        internal static string JobExtension_Cron_Max {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Max", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to From.
+        /// </summary>
+        internal static string JobExtension_Cron_Min {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Min", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minutes.
+        /// </summary>
+        internal static string JobExtension_Cron_Minutes {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Minutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Monday.
+        /// </summary>
+        internal static string JobExtension_Cron_Monday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Monday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Months.
+        /// </summary>
+        internal static string JobExtension_Cron_Months {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Months", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Range.
+        /// </summary>
+        internal static string JobExtension_Cron_Range {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Range", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Saturday.
+        /// </summary>
+        internal static string JobExtension_Cron_Saturday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Saturday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Step.
+        /// </summary>
+        internal static string JobExtension_Cron_Step {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Step", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sunday.
+        /// </summary>
+        internal static string JobExtension_Cron_Sunday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Sunday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thursday.
+        /// </summary>
+        internal static string JobExtension_Cron_Thursday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Thursday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tuesday.
+        /// </summary>
+        internal static string JobExtension_Cron_Tuesday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Tuesday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UI.
+        /// </summary>
+        internal static string JobExtension_Cron_UI {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_UI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wednesday.
+        /// </summary>
+        internal static string JobExtension_Cron_Wednesday {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_Wednesday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Days of the Week.
+        /// </summary>
+        internal static string JobExtension_Cron_WeekDays {
+            get {
+                return ResourceManager.GetString("JobExtension_Cron_WeekDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to (s?) - seconds, optional; (m) - minutes, mandatory; (h) - hours, mandatory; (d) - day of the month, mandatory; (M) - month of the year, mandatory; (wd) - day of the week, mandatory
         ///&lt;br /&gt;Possible values: * = value is not considered; number = execute exactly at the specified number; number-number = range in which to execute; */2 = execute every 2 units starting from 0; number/3 = execute every 3 units starting at the number, up to the last unit; number-number/3 = execute every 3 units in the range, starting [rest of string was truncated]&quot;;.
         /// </summary>
