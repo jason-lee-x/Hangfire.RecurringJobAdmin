@@ -92,6 +92,20 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
             background-color: #1c2129;
             border-color: #4d4d4d;
         }}
+
+        label {{
+            color: #adbac7;
+        }}
+
+        .panel-default {{
+            border-color: #4d4d4d;
+            background-color: #22272e;
+        }}
+
+        .panel-default > .panel-heading {{
+            border-color: #4d4d4d;
+            background-color: #1e232a;
+        }}
     }}
 </style>
 

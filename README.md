@@ -61,7 +61,8 @@ public class RecurringJobTesting
    
 ```
 * ~~We have a new vue component to generate cron expression, made by [@JossyDevers](https://github.com/JossyDevers).~~
-It is on the TO DO list for the moment since this library doesn't use Vue
+
+~~It is on the TO DO list for the moment since this library doesn't use Vue~~
 
 ![jobAgent](https://raw.githubusercontent.com/SerbanApostol/Hangfire.RecurringJobAdmin/master/Content/generatecron.png)
 
