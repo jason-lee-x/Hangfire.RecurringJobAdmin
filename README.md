@@ -60,9 +60,7 @@ public class RecurringJobTesting
    var StoppedJobs = JobAgent.GetAllJobStopped();
    
 ```
-* ~~We have a new vue component to generate cron expression, made by [@JossyDevers](https://github.com/JossyDevers).~~
-
-~~It is on the TO DO list for the moment since this library doesn't use Vue~~
+* We have a component to generate cron expression, inspired by the previous, Vue one made by [@JossyDevers](https://github.com/JossyDevers).
 
 ![jobAgent](https://raw.githubusercontent.com/SerbanApostol/Hangfire.RecurringJobAdmin/master/Content/generatecron.png)
 
@@ -70,7 +68,7 @@ public class RecurringJobTesting
 ## Instructions
 Install a package from Nuget. 
 ```
-Install-Package Hangfire.RecurringJobAdmin
+Install-Package RBC.Hangfire.RecurringJobAdmin
 ```
 
 Then add this in your code:
