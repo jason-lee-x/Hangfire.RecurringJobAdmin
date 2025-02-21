@@ -877,7 +877,7 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
                                     <button class=""btn btn-sm btn-primary""
                                             data-toggle=""modal""
                                             data-target=""#job_editor_modal""
-                                            onclick=""setModalValuesEdit('{job.Id}', '{job.Cron}', '{job.TimeZoneId}', '{job.Class}', '{job.Method}', '{JsonConvert.SerializeObject(job.Arguments).Replace("\"", "&quot;").Replace("\\", "\\\\")}', '{JsonConvert.SerializeObject(job.ArgumentsTypes).Replace("\"", "&quot;")}', '{job.Queue}')"">
+                                            onclick=""setModalValuesEdit('{job.Id}', '{job.Cron}', '{job.TimeZoneId}', '{job.Class}', '{job.Method}', '{JsonConvert.SerializeObject(job.Arguments).Replace("\"", "&quot;").Replace("\'", "&apos;").Replace("\\", "\\\\")}', '{JsonConvert.SerializeObject(job.ArgumentsTypes).Replace("\"", "&quot;").Replace("\'", "&apos;")}', '{job.Queue}')"">
                                         <span class=""glyphicon glyphicon-pencil""></span>
                                     </button>
                                     ");
