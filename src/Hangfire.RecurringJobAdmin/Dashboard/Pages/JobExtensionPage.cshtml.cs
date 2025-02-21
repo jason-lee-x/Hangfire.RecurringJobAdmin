@@ -1414,7 +1414,7 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
                         && hasOnlyDigits(slashSplitCronUnitValue[1])
                         && parsedStep >= 1
                         && parsedStep <= lastIndex) {{
-                        splitCronExpression[i] += ""/"" + slashSplitCronUnitValue[1];
+                        splitCronExpression[i] += ""/"" + parsedStep;
                     }}
                 }} else {{
                     splitCronExpression[i] = ""*"";
@@ -1426,11 +1426,12 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
                     && ((hasOnlyDigits(slashSplitCronUnitValue[0])
                             && parsedUnit >= firstIndex && parsedUnit <= lastIndex)
                         || slashSplitCronUnitValue[0] === ""*"")) {{
+                    splitCronExpression[i] = hasOnlyDigits(slashSplitCronUnitValue[0]) ? String(parsedUnit) : ""*"";
                     if (slashSplitCronUnitValue.length === 2) {{
                         let parsedStep = parseInt(slashSplitCronUnitValue[1]);
-                        if (!(hasOnlyDigits(slashSplitCronUnitValue[1])
-                            && parsedStep >= 1 && parsedStep <= lastIndex)) {{
-                            splitCronExpression[i] = slashSplitCronUnitValue[0];
+                        if (hasOnlyDigits(slashSplitCronUnitValue[1])
+                            && parsedStep >= 1 && parsedStep <= lastIndex) {{
+                            splitCronExpression[i] += ""/"" + parsedStep;
                         }}
                     }}
                 }} else {{
