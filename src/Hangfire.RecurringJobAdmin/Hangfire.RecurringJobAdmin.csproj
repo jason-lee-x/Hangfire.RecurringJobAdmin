@@ -21,7 +21,7 @@
      <NeutralLanguage>en</NeutralLanguage>
      <PackageProjectUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</PackageProjectUrl>
      <RepositoryUrl>https://github.com/SerbanApostol/Hangfire.RecurringJobAdmin.git</RepositoryUrl>
-     <Version>1.0.1</Version>
+     <Version>1.0.4</Version>
      <PackOnBuild>true</PackOnBuild>
      <Description>A dashboard to manage Hangfire's recurring jobs.</Description>
      <PackageReadmeFile>README.md</PackageReadmeFile>
