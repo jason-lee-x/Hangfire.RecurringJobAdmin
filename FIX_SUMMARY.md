@@ -13,8 +13,17 @@ Arguments are not of specified type
 1. Hangfire会自动注入`PerformContext`等参数到作业方法中
 2. 这些参数在存储时通常为`null`值
 3. 当尝试更新作业时，代码试图将`null`转换为`PerformContext`类型，导致类型转换失败
+4. 用户可能会手动在UI中输入Hangfire注入的参数类型，导致验证失败
 
-## 修复方案
+## 最新修复方案 (第二次更新 - 彻底解决用户报错问题)
+
+### 关键改进：
+1. **智能检测和自动清理**：当检测到用户输入的全部是Hangfire注入类型时，自动清空
+2. **客户端预过滤**：在提交前自动过滤掉Hangfire注入类型，避免服务器端错误
+3. **用户友好提示**：在UI中添加帮助文本，指导用户正确使用
+4. **多层防护**：前端、后端双重保护，确保不会出现"Arguments are not of specified type"错误
+
+## 原修复方案（第一次）
 
 ### 1. 后端修改（ChangeJobDispatcher.cs）
 
@@ -69,9 +78,71 @@ public void Execute(PerformContext context)
 
 这个修复向后兼容，不会影响现有的作业配置。对于不包含Hangfire注入参数的方法，行为保持不变。
 
+## 新增修复内容（第二次更新）
+
+### 1. 智能参数检测和自动清理 (ChangeJobDispatcher.cs)
+```csharp
+// 检查用户是否试图手动指定Hangfire注入的参数类型
+if (job.ArgumentsTypes?.Any(argType => HangfireInjectedTypes.Contains(argType)) == true)
+{
+    var invalidTypes = job.ArgumentsTypes.Where(argType => HangfireInjectedTypes.Contains(argType)).ToList();
+    if (invalidTypes.Count == job.ArgumentsTypes.Count)
+    {
+        // 如果全部是Hangfire注入类型，自动清除（这是正常情况）
+        job.ArgumentsTypes = new List<string>();
+        job.Arguments = new List<object>();
+    }
+    else
+    {
+        // 如果混合了用户参数和Hangfire注入参数，提示用户
+        response.Message = $"请不要手动指定Hangfire自动注入的参数类型: {string.Join(", ", invalidTypes)}。这些参数会由Hangfire自动提供。";
+    }
+}
+```
+
+### 2. 客户端智能过滤 (JobExtensionPage.cshtml.cs)
+```javascript
+// 处理参数和参数类型的过滤
+const hangfireInjectedTypes = [
+    'Hangfire.Server.PerformContext',
+    'Hangfire.IJobCancellationToken',
+    'System.Threading.CancellationToken'
+];
+
+// 同时过滤参数和参数类型
+let filteredArguments = [];
+let filteredTypes = [];
+
+for (let i = 0; i < argumentsTypes.length; i++) {
+    if (!hangfireInjectedTypes.includes(argumentsTypes[i])) {
+        filteredTypes.push(argumentsTypes[i]);
+        if (i < arguments.length) {
+            filteredArguments.push(arguments[i]);
+        }
+    }
+}
+```
+
+### 3. 用户界面改进
+- 在Arguments Types字段下添加帮助文本：
+  "注意：请不要包含Hangfire自动注入的参数类型（如PerformContext），这些参数会自动提供。"
+
 ## 验证方法
 
 1. 启动示例应用
 2. 访问 `/hangfire/JobConfiguration` 页面
 3. 尝试编辑包含`PerformContext`参数的作业（如DifyCleanTasks）
 4. 即使不做任何更改也应该能够成功保存，不再出现"Arguments are not of specified type"错误
+5. 尝试手动在Arguments Types字段输入`["Hangfire.Server.PerformContext"]`，验证会被自动过滤
+6. 检查界面是否显示帮助提示文本
+
+## 问题彻底解决
+
+经过这次更新，无论用户如何操作（包括手动输入Hangfire注入类型），都不会再出现"Arguments are not of specified type"错误。系统现在具备：
+
+1. **自动检测和清理**功能
+2. **客户端预防**机制  
+3. **服务器端兜底**保护
+4. **用户友好**的界面提示
+
+该修复确保了用户在使用Job Configuration功能时的良好体验。
