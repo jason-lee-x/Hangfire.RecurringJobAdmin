@@ -55,6 +55,28 @@ namespace Hangfire.RecurringJobAdmin.Pages
             job.Queue = context.Request.GetQuery("Queue");
             job.TimeZoneId = context.Request.GetQuery("TimeZoneId");
 
+            // 检查用户是否试图手动指定Hangfire注入的参数类型
+            if (job.ArgumentsTypes?.Any(argType => HangfireInjectedTypes.Contains(argType)) == true)
+            {
+                var invalidTypes = job.ArgumentsTypes.Where(argType => HangfireInjectedTypes.Contains(argType)).ToList();
+                if (invalidTypes.Count == job.ArgumentsTypes.Count)
+                {
+                    // 如果全部是Hangfire注入类型，自动清除（这是正常情况）
+                    job.ArgumentsTypes = new List<string>();
+                    job.Arguments = new List<object>();
+                }
+                else
+                {
+                    // 如果混合了用户参数和Hangfire注入参数，提示用户
+                    response.Status = false;
+                    response.Message = $"请不要手动指定Hangfire自动注入的参数类型: {string.Join(", ", invalidTypes)}。这些参数会由Hangfire自动提供。";
+
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+                    return;
+                }
+            }
+
             var timeZone = TimeZoneInfo.Utc;
 
             if (!Utility.IsValidSchedule(job.Cron))
@@ -102,19 +124,30 @@ namespace Hangfire.RecurringJobAdmin.Pages
             var filteredArgumentsTypes = new List<string>();
             var filteredArguments = new List<object>();
             
-            var argumentsList = job.Arguments.ToList();
-            var argumentsTypesList = job.ArgumentsTypes.ToList();
+            var argumentsList = job.Arguments?.ToList() ?? new List<object>();
+            var argumentsTypesList = job.ArgumentsTypes?.ToList() ?? new List<string>();
             
-            for (int i = 0; i < argumentsTypesList.Count; i++)
+            // 如果所有参数类型都是Hangfire注入类型，直接清空
+            if (argumentsTypesList.All(argType => HangfireInjectedTypes.Contains(argType)))
             {
-                var argType = argumentsTypesList[i];
-                if (!HangfireInjectedTypes.Contains(argType))
+                // 所有参数都是Hangfire注入的，不需要用户提供
+                filteredArgumentsTypes = new List<string>();
+                filteredArguments = new List<object>();
+            }
+            else
+            {
+                // 有用户自定义参数，需要过滤
+                for (int i = 0; i < argumentsTypesList.Count; i++)
                 {
-                    filteredArgumentsTypes.Add(argType);
-                    // 如果有对应的参数值，添加它；否则添加null
-                    if (i < argumentsList.Count)
+                    var argType = argumentsTypesList[i];
+                    if (!HangfireInjectedTypes.Contains(argType))
                     {
-                        filteredArguments.Add(argumentsList[i]);
+                        filteredArgumentsTypes.Add(argType);
+                        // 如果有对应的参数值，添加它；否则添加null
+                        if (i < argumentsList.Count)
+                        {
+                            filteredArguments.Add(argumentsList[i]);
+                        }
                     }
                 }
             }

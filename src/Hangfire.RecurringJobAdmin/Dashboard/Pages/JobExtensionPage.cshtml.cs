@@ -635,6 +635,9 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
                     <div class=""form-group"">
                         <label for=""argumentsTypes"">{RecurringJobAdminStrings.Common_ArgumentsTypes}</label>
                         <input type=""text"" id=""argumentsTypes"" name=""argumentsTypes"" class=""form-control"" placeholder=""{RecurringJobAdminStrings.Common_Input} {RecurringJobAdminStrings.Common_ArgumentsTypes}"">
+                        <small class=""form-text text-muted"">
+                            注意：请不要包含Hangfire自动注入的参数类型（如PerformContext），这些参数会自动提供。
+                        </small>
                     </div>
 
                     <div class=""form-group"">
@@ -1103,11 +1106,46 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
         if (methodElement !== null && methodElement !== undefined) {{
             saveJobUrlParameters += ""Method="" + methodElement.value + ""&"";
         }}
+        // 处理参数和参数类型的过滤
+        const hangfireInjectedTypes = [
+            'Hangfire.Server.PerformContext',
+            'Hangfire.IJobCancellationToken',
+            'System.Threading.CancellationToken'
+        ];
+        
+        let argumentsTypes = [];
+        let arguments = [];
+        
+        try {{
+            argumentsTypes = JSON.parse(argumentsTypesElement?.value || '[]');
+        }} catch (e) {{
+            argumentsTypes = [];
+        }}
+        
+        try {{
+            arguments = JSON.parse(argumentsElement?.value || '[]');
+        }} catch (e) {{
+            arguments = [];
+        }}
+        
+        // 同时过滤参数和参数类型
+        let filteredArguments = [];
+        let filteredTypes = [];
+        
+        for (let i = 0; i < argumentsTypes.length; i++) {{
+            if (!hangfireInjectedTypes.includes(argumentsTypes[i])) {{
+                filteredTypes.push(argumentsTypes[i]);
+                if (i < arguments.length) {{
+                    filteredArguments.push(arguments[i]);
+                }}
+            }}
+        }}
+        
         if (argumentsElement !== null && argumentsElement !== undefined) {{
-            saveJobUrlParameters += ""Arguments="" + argumentsElement.value + ""&"";
+            saveJobUrlParameters += ""Arguments="" + JSON.stringify(filteredArguments) + ""&"";
         }}
         if (argumentsTypesElement !== null && argumentsTypesElement !== undefined) {{
-            saveJobUrlParameters += ""ArgumentsTypes="" + argumentsTypesElement.value + ""&"";
+            saveJobUrlParameters += ""ArgumentsTypes="" + JSON.stringify(filteredTypes) + ""&"";
         }}
         if (queueElement !== null && queueElement !== undefined) {{
             saveJobUrlParameters += ""Queue="" + queueElement.value + ""&"";
