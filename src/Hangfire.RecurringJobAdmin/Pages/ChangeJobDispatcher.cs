@@ -1,4 +1,4 @@
-﻿using Hangfire.Annotations;
+using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Hangfire.RecurringJobAdmin.Core;
 using Hangfire.RecurringJobAdmin.Models;
@@ -17,6 +17,14 @@ namespace Hangfire.RecurringJobAdmin.Pages
     {
         private readonly IStorageConnection _connection;
         private readonly RecurringJobRegistry _recurringJobRegistry;
+
+        // Hangfire自动注入的参数类型，这些参数不需要用户提供
+        private static readonly HashSet<string> HangfireInjectedTypes = new HashSet<string>
+        {
+            "Hangfire.Server.PerformContext",
+            "Hangfire.IJobCancellationToken",
+            "System.Threading.CancellationToken"
+        };
 
         public ChangeJobDispatcher()
         {
@@ -90,7 +98,28 @@ namespace Hangfire.RecurringJobAdmin.Pages
                 return;
             }
 
-            var argumentTypes = job.ArgumentsTypes
+            // 过滤掉Hangfire自动注入的参数类型和对应的参数值
+            var filteredArgumentsTypes = new List<string>();
+            var filteredArguments = new List<object>();
+            
+            var argumentsList = job.Arguments.ToList();
+            var argumentsTypesList = job.ArgumentsTypes.ToList();
+            
+            for (int i = 0; i < argumentsTypesList.Count; i++)
+            {
+                var argType = argumentsTypesList[i];
+                if (!HangfireInjectedTypes.Contains(argType))
+                {
+                    filteredArgumentsTypes.Add(argType);
+                    // 如果有对应的参数值，添加它；否则添加null
+                    if (i < argumentsList.Count)
+                    {
+                        filteredArguments.Add(argumentsList[i]);
+                    }
+                }
+            }
+
+            var argumentTypes = filteredArgumentsTypes
                     .Select(at => Type.GetType(at) ?? StorageAssemblySingleton.GetInstance().currentAssembly?
                         .FirstOrDefault(a => a.GetType(at) != null)?.GetType(at))
                     .ToArray();
@@ -105,11 +134,13 @@ namespace Hangfire.RecurringJobAdmin.Pages
             //    return;
             //}
 
-            var argsList = job.Arguments.ToList();
+            var argsList = filteredArguments.ToList();
             try
             {
                 for (var i = 0; i < argsList.Count; i++)
                 {
+                    if (i >= argumentTypes.Length) break; // 防止索引越界
+                    
                     if (argsList[i] is Newtonsoft.Json.Linq.JObject jobj)
                     {
                         argsList[i] = jobj.ToObject(argumentTypes[i]);
@@ -126,7 +157,21 @@ namespace Hangfire.RecurringJobAdmin.Pages
                     {
                         argsList[i] = jValue.ToObject(argumentTypes[i]);
                     }
-                    argsList[i] = Convert.ChangeType(argsList[i], argumentTypes[i]);
+                    
+                    if (argsList[i] != null)
+                    {
+                        argsList[i] = Convert.ChangeType(argsList[i], argumentTypes[i]);
+                    }
+                    else if (!argumentTypes[i].IsValueType || Nullable.GetUnderlyingType(argumentTypes[i]) != null)
+                    {
+                        // null值只有在参数类型是引用类型或可空值类型时才允许
+                        argsList[i] = null;
+                    }
+                    else
+                    {
+                        // 对于不可空的值类型，使用默认值
+                        argsList[i] = Activator.CreateInstance(argumentTypes[i]);
+                    }
                 }
             }
             catch
@@ -139,9 +184,11 @@ namespace Hangfire.RecurringJobAdmin.Pages
 
                 return;
             }
-            job.Arguments = argsList;
 
-            if (job.Arguments.Any() && (argumentTypes.Any(t => t == null) || !StorageAssemblySingleton.GetInstance().AreValidArguments(job.Class, job.Method, job.Arguments, argumentTypes)))
+            // 使用过滤后的参数
+            var finalArguments = argsList;
+
+            if (finalArguments.Any() && (argumentTypes.Any(t => t == null) || !StorageAssemblySingleton.GetInstance().AreValidArguments(job.Class, job.Method, finalArguments, argumentTypes)))
             {
                 response.Status = false;
                 response.Message = "Method not found or the Arguments are not valid";
@@ -152,15 +199,22 @@ namespace Hangfire.RecurringJobAdmin.Pages
                 return;
             }
 
-            var methodInfo = (Type.GetType(job.Class) ?? StorageAssemblySingleton.GetInstance().currentAssembly
-                .FirstOrDefault(x => x?.GetType(job.Class)?.GetMethod(job.Method, argumentTypes) != null)
-                .GetType(job.Class))
-                .GetMethod(job.Method, argumentTypes);
+            // 获取完整的参数类型数组（包括Hangfire注入的类型）用于方法查找
+            var allArgumentTypes = job.ArgumentsTypes
+                    .Select(at => Type.GetType(at) ?? StorageAssemblySingleton.GetInstance().currentAssembly?
+                        .FirstOrDefault(a => a.GetType(at) != null)?.GetType(at))
+                    .ToArray();
 
+            var methodInfo = (Type.GetType(job.Class) ?? StorageAssemblySingleton.GetInstance().currentAssembly
+                .FirstOrDefault(x => x?.GetType(job.Class)?.GetMethod(job.Method, allArgumentTypes) != null)
+                .GetType(job.Class))
+                .GetMethod(job.Method, allArgumentTypes);
+
+            // 注册作业时使用过滤后的参数
             _recurringJobRegistry.Register(
                       job.Id,
                       methodInfo,
-                      job.Arguments.ToArray(),
+                      finalArguments.ToArray(),
                       job.Cron,
                       timeZone,
                       job.Queue ?? EnqueuedState.DefaultQueue);

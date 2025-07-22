@@ -1,4 +1,4 @@
-﻿using Cronos;
+using Cronos;
 using Hangfire.Annotations;
 using Hangfire.Dashboard;
 using Hangfire.Dashboard.Pages;
@@ -47,24 +47,56 @@ namespace Hangfire.RecurringJobAdmin.Dashboard.Pages
                 {
                     recurringJobs = connection.GetRecurringJobs();
                 }
-                allJobs = recurringJobs.Select(x => new PeriodicJob
-                {
-                    Id = x.Id,
-                    Cron = x.Cron,
-                    CreatedAt = x.CreatedAt.HasValue ? x.CreatedAt.Value.ChangeTimeZone(x.TimeZoneId) : new DateTime(),
-                    Error = x.Error,
-                    LastExecution = x.LastExecution,
-                    Method = x.Job?.Method.Name,
-                    Arguments = x.Job?.Args,
-                    ArgumentsTypes = x.Job?.Method.GetParameters()?.Select(p => p.ParameterType.FullName),
-                    JobState = "Running",
-                    Class = x.Job?.Type.FullName,
-                    Queue = x.Queue,
-                    LastJobId = x.LastJobId,
-                    LastJobState = x.LastJobState,
-                    NextExecution = x.NextExecution,
-                    Removed = x.Removed,
-                    TimeZoneId = x.TimeZoneId
+                allJobs = recurringJobs.Select(x => {
+                    var parameters = x.Job?.Method.GetParameters();
+                    var args = x.Job?.Args ?? new object[0];
+                    
+                    // 过滤掉Hangfire自动注入的参数类型（这些参数通常为null）
+                    var hangfireInjectedTypes = new HashSet<string>
+                    {
+                        "Hangfire.Server.PerformContext",
+                        "Hangfire.IJobCancellationToken", 
+                        "System.Threading.CancellationToken"
+                    };
+                    
+                    var filteredArgs = new List<object>();
+                    var filteredArgTypes = new List<string>();
+                    
+                    if (parameters != null)
+                    {
+                        for (int i = 0; i < parameters.Length; i++)
+                        {
+                            var paramType = parameters[i].ParameterType.FullName;
+                            if (!hangfireInjectedTypes.Contains(paramType))
+                            {
+                                filteredArgTypes.Add(paramType);
+                                if (i < args.Length)
+                                {
+                                    filteredArgs.Add(args[i]);
+                                }
+                            }
+                        }
+                    }
+                    
+                    return new PeriodicJob
+                    {
+                        Id = x.Id,
+                        Cron = x.Cron,
+                        CreatedAt = x.CreatedAt.HasValue ? x.CreatedAt.Value.ChangeTimeZone(x.TimeZoneId) : new DateTime(),
+                        Error = x.Error,
+                        LastExecution = x.LastExecution,
+                        Method = x.Job?.Method.Name,
+                        Arguments = filteredArgs,
+                        ArgumentsTypes = filteredArgTypes,
+                        JobState = "Running",
+                        Class = x.Job?.Type.FullName,
+                        Queue = x.Queue,
+                        LastJobId = x.LastJobId,
+                        LastJobState = x.LastJobState,
+                        NextExecution = x.NextExecution,
+                        Removed = x.Removed,
+                        TimeZoneId = x.TimeZoneId
+                    };
                 }).Concat(stoppedJobs.Skip(Math.Min(0, pager.FromRecord - recurringJobs.Count)).Take(pager.RecordsPerPage - recurringJobs.Count));
             }
 
