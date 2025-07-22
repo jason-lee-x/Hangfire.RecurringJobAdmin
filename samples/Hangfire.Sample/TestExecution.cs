@@ -1,4 +1,5 @@
-﻿using Hangfire.RecurringJobAdmin;
+using Hangfire.RecurringJobAdmin;
+using Hangfire.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,25 @@ namespace Hangfire.JobExtensions.DotNetCore.Test
         public void CheckFileExists()
         {
             Console.WriteLine("Check File Exists");
+        }
+
+        /// <summary>
+        /// 测试带有PerformContext参数的方法 - 这个方法应该能够在Job Configuration页面正常编辑而不报错
+        /// </summary>
+        [RecurringJob("0 0 * * *", "Asia/Shanghai", "default", RecurringJobId = "DifyCleanTasks")]
+        public void Execute(PerformContext context)
+        {
+            Console.WriteLine($"DifyCleanTasks executed at {DateTime.Now}");
+            context?.WriteLine("Task completed successfully");
+        }
+
+        /// <summary>
+        /// 测试带有其他参数加PerformContext的方法
+        /// </summary>
+        public void ExecuteWithParams(string message, int count, PerformContext context)
+        {
+            Console.WriteLine($"ExecuteWithParams: {message}, Count: {count}");
+            context?.WriteLine($"Processing {count} items with message: {message}");
         }
     }
 
